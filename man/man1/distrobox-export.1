@@ -1,6 +1,6 @@
 .\
 .\"
-.TH "DISTROBOX\-EXPORT" "1" "May 2026" "Distrobox" "User Manual"
+.TH "DISTROBOX\-EXPORT" "1" "Jun 2026" "Distrobox" "User Manual"
 .SH NAME
 .IP
 .EX
@@ -28,7 +28,7 @@ will automatically be launched from the container it is exported from.
             Defaults to (on \[rs]$container_name)
 \-\-export\-path/\-ep:  path where to export the binary
 \-\-extra\-flags/\-ef:  extra flags to add to the command
-\-\-enter\-flags/\-nf:  flags to add to distrobox\-enter
+\-\-enter\-flags/\-nf:  flags to add to \[ga]distrobox enter\[ga]
 \-\-sudo/\-S:      specify if the exported item should be run as sudo
 \-\-help/\-h:      show this message
 \-\-verbose/\-v:       show more verbosity
@@ -54,7 +54,7 @@ distrobox\-export \-\-app abiword
 .PP
 This tool will simply copy the original \f[CR].desktop\f[R] files along
 with needed icons, add the prefix
-\f[CR]/usr/local/bin/distrobox\-enter \-n distrobox_name \-e ...\f[R] to
+\f[CR]/usr/local/bin/distrobox enter \-n distrobox_name \-e ...\f[R] to
 the commands to run, and save them in your home to be used directly from
 the host as a normal app.
 .IP
@@ -74,7 +74,7 @@ distrobox\-export \-\-bin /usr/bin/code \-\-extra\-flags \[dq]\-\-foreground\[dq
 In the case of exporting binaries, you will have to specify
 \f[B]where\f[R] to export it (\f[CR]\-\-export\-path\f[R]) and the tool
 will create a little wrapper script that will
-\f[CR]distrobox\-enter \-e\f[R] from the host, the desired binary.
+\f[CR]distrobox enter \-e\f[R] from the host, the desired binary.
 This can be handy with the use of \f[CR]direnv\f[R] to have different
 versions of the same binary based on your \f[CR]env\f[R] or project.
 .PP

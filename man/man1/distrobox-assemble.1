@@ -1,16 +1,15 @@
 '\" t
 .\
 .\"
-.TH "DISTROBOX\-ASSEMBLE" "1" "May 2026" "Distrobox" "User Manual"
+.TH "DISTROBOX\-ASSEMBLE" "1" "Jun 2026" "Distrobox" "User Manual"
 .SH NAME
 .IP
 .EX
 distrobox assemble
-distrobox\-assemble
 .EE
 .SH DESCRIPTION
-distrobox\-assemble takes care of creating or destroying containers in
-batches, based on a manifest file.
+\f[CR]distrobox assemble\f[R] takes care of creating or destroying
+containers in batches, based on a manifest file.
 The manifest file by default is \f[CR]./distrobox.ini\f[R], but can be
 specified using the \f[CR]\-\-file\f[R] flag.
 .SH SYNOPSIS
@@ -74,7 +73,7 @@ distrobox assemble create \-\-file /my/custom/path.ini
 Or even specify a remote file, by using an URL:
 .IP
 .EX
-distrobox\-assemble create \-\-file https://raw.githubusercontent.com/89luca89/dotfiles/master/distrobox.ini
+distrobox assemble create \-\-file https://raw.githubusercontent.com/89luca89/dotfiles/master/distrobox.ini
 .EE
 .PP
 \f[B]Replace\f[R]
