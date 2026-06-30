@@ -30,14 +30,17 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
-          mkdir -p ./bin
           make build
-          mv ./bin/distrobox distrobox-${{ matrix.goos }}-${{ matrix.goarch }}
+
+      - name: Package
+        run: |
+          cd ./bin
+          tar czf ../distrobox-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz .
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: distrobox-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: distrobox-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: distrobox-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
 
   release:
     needs: build
@@ -55,6 +58,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           version="${GITHUB_REF_NAME}"
+          # If a release for this tag already exists (e.g. it was drafted
+          # from the web UI, which pushes the tag along with the draft),
+          # delete it so we can re-create it with the freshly built artifacts
+          # and auto-generated notes. The tag itself is left untouched.
+          if gh release view "${version}" >/dev/null 2>&1; then
+            gh release delete "${version}" --yes
+          fi
           gh release create "${version}" \
             --title "${version}" \
             --generate-notes \
