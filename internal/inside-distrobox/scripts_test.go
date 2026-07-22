@@ -37,15 +37,13 @@ func isolatePath(t *testing.T) {
 	t.Setenv("PATH", "")
 }
 
-// TestProvisionScripts_CustomDir checks the DBX_SCRIPTS_DIR override:
-// when set to an empty directory, ProvisionScripts writes all three
-// scripts there and returns that directory.
+// TestProvisionScripts_CustomDir checks that ProvisionScripts writes all three
+// scripts into the given directory and returns it unchanged.
 func TestProvisionScripts_CustomDir(t *testing.T) {
 	tmpDir := t.TempDir()
-	t.Setenv("DBX_SCRIPTS_DIR", tmpDir)
 	isolatePath(t)
 
-	dir, err := insidedistrobox.ProvisionScripts()
+	dir, err := insidedistrobox.ProvisionScripts(tmpDir)
 	require.NoError(t, err)
 	require.Equal(t, tmpDir, dir)
 	assertAllScripts(t, dir)
@@ -56,6 +54,7 @@ func TestProvisionScripts_CustomDir(t *testing.T) {
 // somewhere on PATH, ProvisionScripts leaves them byte-for-byte
 // untouched rather than overwriting from the embedded copies.
 func TestProvisionScripts_DetectOnPath(t *testing.T) {
+	writeDir := t.TempDir()
 	scriptsDir := t.TempDir()
 	marker := "#!/bin/sh\n# pre-existing-marker\n"
 	for _, name := range expectedScripts {
@@ -63,9 +62,8 @@ func TestProvisionScripts_DetectOnPath(t *testing.T) {
 	}
 
 	t.Setenv("PATH", scriptsDir)
-	t.Setenv("DBX_SCRIPTS_DIR", t.TempDir())
 
-	_, err := insidedistrobox.ProvisionScripts()
+	_, err := insidedistrobox.ProvisionScripts(writeDir)
 	require.NoError(t, err)
 
 	for _, name := range expectedScripts {
@@ -75,15 +73,10 @@ func TestProvisionScripts_DetectOnPath(t *testing.T) {
 	}
 }
 
-// TestProvisionScripts_ExtractsAdjacentToBinary verifies the default
-// resolution: with no DBX_SCRIPTS_DIR override and nothing on PATH,
-// ProvisionScripts writes to the directory containing the running
-// binary. That is the layout a fresh `go install` or curl-only deploy
-// produces.
+// TestProvisionScripts_ExtractsAdjacentToBinary verifies that ProvisionScripts
+// writes to the given directory.
 func TestProvisionScripts_ExtractsAdjacentToBinary(t *testing.T) {
-	t.Setenv("DBX_SCRIPTS_DIR", "")
 	isolatePath(t)
-	t.Setenv("HOME", t.TempDir())
 
 	exe, err := os.Executable()
 	require.NoError(t, err)
@@ -97,7 +90,7 @@ func TestProvisionScripts_ExtractsAdjacentToBinary(t *testing.T) {
 		}
 	})
 
-	dir, err := insidedistrobox.ProvisionScripts()
+	dir, err := insidedistrobox.ProvisionScripts(exeDir)
 	require.NoError(t, err)
 	require.Equal(t, exeDir, dir)
 	assertAllScripts(t, dir)
