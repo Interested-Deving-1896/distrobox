@@ -1,3 +1,22 @@
+// SPDX-License-Identifier: GPL-3.0-only
+//
+// This file is part of the distrobox project:
+//    https://github.com/89luca89/distrobox
+//
+// Copyright (C) 2021 distrobox contributors
+//
+// distrobox is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License version 3
+// as published by the Free Software Foundation.
+//
+// distrobox is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with distrobox; if not, see <http://www.gnu.org/licenses/>.
+
 package providers
 
 import (
@@ -70,11 +89,6 @@ type inspectOutput struct {
 		Labels map[string]string `json:"Labels"`
 		Env    []string          `json:"Env"`
 	} `json:"Config"`
-}
-
-type InspectImageOutput struct {
-	ID           string `json:"ID"`
-	Architecture string `json:"Architecture"`
 }
 
 func (d *Docker) ListContainers(ctx context.Context) ([]containermanager.Container, error) {
@@ -398,6 +412,16 @@ func (d *Docker) makeCreateCommand(
 	// macOS where the container always has root over the VM filesystem.
 	if !d.root {
 		options = append(options, "--volume", "/dev/null:/run/.distrobox.rootless:ro")
+	}
+
+	// Docker has no run.oci.keep_original_groups equivalent, and the device
+	// nodes we bind carry the host's numeric gid, so the user's supplementary
+	// groups have to be forwarded by number. Rootless podman+runc can't do this
+	// at all (host gids fall outside the userns map), hence podman's crun reliance.
+	if groups, err := os.Getgroups(); err == nil {
+		for _, gid := range groups {
+			options = append(options, "--group-add", strconv.Itoa(gid))
+		}
 	}
 
 	// Add additional flags

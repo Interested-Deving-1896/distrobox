@@ -1,3 +1,22 @@
+// SPDX-License-Identifier: GPL-3.0-only
+//
+// This file is part of the distrobox project:
+//    https://github.com/89luca89/distrobox
+//
+// Copyright (C) 2021 distrobox contributors
+//
+// distrobox is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License version 3
+// as published by the Free Software Foundation.
+//
+// distrobox is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with distrobox; if not, see <http://www.gnu.org/licenses/>.
+
 package userenv
 
 import (
@@ -27,8 +46,6 @@ type UserEnvironment struct {
 // - USER
 // - HOME
 // - SHELL
-//
-//nolint:gocognit
 func LoadUserEnvironment(ctx context.Context) *UserEnvironment {
 	env := &UserEnvironment{}
 
@@ -71,19 +88,10 @@ func LoadUserEnvironment(ctx context.Context) *UserEnvironment {
 		}
 	}
 
-	// USER ID
-	if uid := os.Getuid(); uid >= 0 {
-		env.UserID = strconv.Itoa(uid)
-	} else if uid, err := exec.CommandContext(ctx, "id", "-ru").Output(); err == nil {
-		env.UserID = strings.TrimSpace(string(uid))
-	}
-
-	// GROUP ID
-	if gid := os.Getgid(); gid >= 0 {
-		env.GroupID = strconv.Itoa(gid)
-	} else if gid, err := exec.CommandContext(ctx, "id", "-rg").Output(); err == nil {
-		env.GroupID = strings.TrimSpace(string(gid))
-	}
+	// os.Getuid/os.Getgid only return -1 on Windows; distrobox is Linux/macOS
+	// only, so they always succeed.
+	env.UserID = strconv.Itoa(os.Getuid())
+	env.GroupID = strconv.Itoa(os.Getgid())
 
 	// DESKTOP ENTRY DIR
 	if xdgDataHome := os.Getenv("XDG_DATA_HOME"); xdgDataHome != "" {

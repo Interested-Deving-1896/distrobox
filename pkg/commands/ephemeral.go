@@ -1,3 +1,22 @@
+// SPDX-License-Identifier: GPL-3.0-only
+//
+// This file is part of the distrobox project:
+//    https://github.com/89luca89/distrobox
+//
+// Copyright (C) 2021 distrobox contributors
+//
+// distrobox is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License version 3
+// as published by the Free Software Foundation.
+//
+// distrobox is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with distrobox; if not, see <http://www.gnu.org/licenses/>.
+
 package commands
 
 import (
@@ -24,7 +43,6 @@ type EphemeralOptions struct {
 	// ephemeral container instead of the default login shell. It is forwarded
 	// to the underlying enter command.
 	CustomCommand []string
-	DryRun        bool
 }
 
 type EphemeralCommand struct {
@@ -68,7 +86,6 @@ func (c *EphemeralCommand) Execute(ctx context.Context, opts EphemeralOptions) e
 	createOpts.ContainerName = name
 	// override options not relevant for creating ephemeral containers
 	createOpts.GenerateEntry = false
-	createOpts.DryRun = opts.DryRun
 	createOpts.NonInteractive = true
 	if _, createErr := c.createCmd.Execute(ctx, createOpts); createErr != nil {
 		return fmt.Errorf("ephemeral: %w", createErr)

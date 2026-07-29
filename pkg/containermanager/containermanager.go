@@ -1,3 +1,22 @@
+// SPDX-License-Identifier: GPL-3.0-only
+//
+// This file is part of the distrobox project:
+//    https://github.com/89luca89/distrobox
+//
+// Copyright (C) 2021 distrobox contributors
+//
+// distrobox is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License version 3
+// as published by the Free Software Foundation.
+//
+// distrobox is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with distrobox; if not, see <http://www.gnu.org/licenses/>.
+
 package containermanager
 
 import (
@@ -6,6 +25,7 @@ import (
 	"os"
 	"regexp"
 	"runtime"
+	"slices"
 	"strings"
 	"time"
 
@@ -192,10 +212,10 @@ func BuildContainerPath(cleanPath bool, hostPath string, containerPath string) s
 	}
 
 	// Add standard paths not in host PATH
+	hostSegments := strings.Split(hostPath, ":")
 	var additionalPaths []string
 	for _, sp := range standardPaths {
-		pattern := regexp.MustCompile(`(:|^)` + regexp.QuoteMeta(sp) + `(:|$)`)
-		if !pattern.MatchString(hostPath) {
+		if !slices.Contains(hostSegments, sp) {
 			additionalPaths = append(additionalPaths, sp)
 		}
 	}
@@ -231,8 +251,7 @@ func reorderFHSPath(path string) string {
 	// If /usr/bin or /usr/sbin were absent, their local counterparts were
 	// skipped above; re-add any that went missing (prepended, like the shell).
 	for _, lp := range []string{"/usr/local/bin", "/usr/local/sbin"} {
-		pattern := regexp.MustCompile(`(:|^)` + regexp.QuoteMeta(lp) + `(:|$)`)
-		if !pattern.MatchString(result) {
+		if !slices.Contains(strings.Split(result, ":"), lp) {
 			result = lp + ":" + result
 		}
 	}
@@ -244,10 +263,9 @@ func BuildXDGPaths(envVar string, standardPaths []string) string {
 	containerPaths := os.Getenv(envVar)
 
 	for _, sp := range standardPaths {
-		pattern := regexp.MustCompile(`(:|^)` + regexp.QuoteMeta(sp) + `(:|$)`)
 		if containerPaths == "" {
 			containerPaths = sp
-		} else if !pattern.MatchString(containerPaths) {
+		} else if !slices.Contains(strings.Split(containerPaths, ":"), sp) {
 			containerPaths = containerPaths + ":" + sp
 		}
 	}
@@ -374,5 +392,5 @@ func BuildCommandArgs(customCommand []string, user string, noTTY bool, unshareGr
 }
 
 func TimestampNow() string {
-	return time.Now().UTC().Format("2006-01-02T15:04:05.000000000+00:00")
+	return time.Now().UTC().Format(time.RFC3339Nano)
 }

@@ -1,9 +1,29 @@
+// SPDX-License-Identifier: GPL-3.0-only
+//
+// This file is part of the distrobox project:
+//    https://github.com/89luca89/distrobox
+//
+// Copyright (C) 2021 distrobox contributors
+//
+// distrobox is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License version 3
+// as published by the Free Software Foundation.
+//
+// distrobox is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with distrobox; if not, see <http://www.gnu.org/licenses/>.
+
 package providers
 
 import (
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -63,6 +83,14 @@ func TestDocker_makeCreateCommand(t *testing.T) {
 		selinuxVolume = " --volume /sys/fs/selinux"
 	}
 
+	// Group forwarding mirrors os.Getgroups(), which varies by host.
+	groupAddFlags := ""
+	if groups, err := os.Getgroups(); err == nil {
+		for _, gid := range groups {
+			groupAddFlags += " --group-add " + strconv.Itoa(gid)
+		}
+	}
+
 	expected := oneline(`
  create
  --hostname my-hostname
@@ -101,6 +129,7 @@ func TestDocker_makeCreateCommand(t *testing.T) {
  --volume /etc/hosts:/etc/hosts:ro
  --volume /etc/resolv.conf:/etc/resolv.conf:ro
  --volume /dev/null:/run/.distrobox.rootless:ro
+ ` + groupAddFlags + `
  --volume /path/to/my-volume:/var/local/my-volume:ro
  --volume /path/to/distrobox-init:/usr/bin/entrypoint:ro
  --entrypoint /usr/bin/entrypoint
