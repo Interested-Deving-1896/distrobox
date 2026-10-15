@@ -1,20 +1,9 @@
 ---
 name: NVIDIA integration
 
-# distrobox-init holds the --nvidia mirroring logic, so run this expensive
-# VM-based test when that script (or the test harness itself) changes. Also run
-# it on dependabot PRs — they bump the Go toolchain and the actions this
-# harness depends on, and that can break the build just as easily as a code
-# change.
 on:
   pull_request:
     branches: [main]
-    paths:
-      - internal/inside-distrobox/assets/distrobox-init
-      - hack/test/**
-      - go.mod
-      - go.sum
-      - .github/workflows/**
   workflow_dispatch:
 
 permissions:
@@ -73,7 +62,7 @@ jobs:
       # invalidates it; restore-keys still serves the last image for the distro.
       - name: Restore cached base cloud image
         id: img-cache
-        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/distrobox-vmtest
           key: qcow2-${{ matrix.distro }}-${{ hashFiles('hack/test/vm-run.sh') }}
